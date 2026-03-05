@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MachineTrack — Controle de Horas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ─── HEADER ─── -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚙</div>
+      <div class="logo-text">MACHINE<span>TRACK</span></div>
+    </div>
+    <div class="header-clock" id="clock">00:00:00</div>
+    <div class="header-status">
+      <div class="pulse"></div>
+      SISTEMA ATIVO
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ─── KPIs ─── -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Total de Horas</div>
+        <div class="kpi-value" id="kpi-total">0,0h</div>
+        <div class="kpi-sub">acumulado geral</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Em Operação</div>
+        <div class="kpi-value" id="kpi-op">0,0h</div>
+        <div class="kpi-sub">horas produtivas</div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">Paradas</div>
+        <div class="kpi-value" id="kpi-par">0,0h</div>
+        <div class="kpi-sub">manutenção + paradas</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-label">Registros</div>
+        <div class="kpi-value" id="kpi-reg">0</div>
+        <div class="kpi-sub">lançamentos totais</div>
+      </div>
+    </div>
+
+    <!-- ─── LAYOUT ─── -->
+    <div class="layout">
+
+      <!-- LEFT: Form + Tabela -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <!-- FORM -->
+        <div class="panel">
+          <div class="panel-header">
+            Novo Lançamento
+            <span id="form-date-label">—</span>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Máquina</label>
+              <select id="f-maquina">
+                <option value="">Selecione...</option>
+                <option>CNC-01 — Torno CNC</option>
+                <option>FRS-02 — Fresadora</option>
+                <option>SOL-03 — Solda MIG</option>
+                <option>PRN-04 — Prensa Hidráulica</option>
+                <option>INJ-05 — Injetora Plástico</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Operador</label>
+              <input id="f-operador" type="text" placeholder="Nome do operador">
+            </div>
+            <div class="field">
+              <label>Data</label>
+              <input id="f-data" type="date">
+            </div>
+            <div class="field">
+              <label>Turno</label>
+              <select id="f-turno">
+                <option>Turno A (06h–14h)</option>
+                <option>Turno B (14h–22h)</option>
+                <option>Turno C (22h–06h)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Hora Início</label>
+              <input id="f-inicio" type="time">
+            </div>
+            <div class="field">
+              <label>Hora Fim</label>
+              <input id="f-fim" type="time">
+            </div>
+            <div class="field">
+              <label>Tipo</label>
+              <select id="f-tipo">
+                <option value="op">Operação</option>
+                <option value="man">Manutenção</option>
+                <option value="par">Parada</option>
+                <option value="oci">Ocioso</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Horas (calc.)</label>
+              <input id="f-horas" type="text" placeholder="Auto" readonly style="color:var(--accent)">
+            </div>
+            <div class="field form-full">
+              <label>Observação</label>
+              <textarea id="f-obs" placeholder="Descreva a atividade realizada..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="salvarRegistro()">⊕ REGISTRAR LANÇAMENTO</button>
+          </div>
+        </div>
+
+        <!-- TABELA -->
+        <div class="panel">
+          <div class="panel-header">
+            Histórico de Lançamentos
+            <span id="table-count">0 registros</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Máquina</th>
+                  <th>Operador</th>
+                  <th>Data</th>
+                  <th>Turno</th>
+                  <th>Período</th>
+                  <th>Horas</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tabela-body">
+                <tr>
+                  <td colspan="9">
+                    <div class="empty">
+                      <div class="empty-icon">⚙</div>
+                      Nenhum lançamento registrado
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Máquinas -->
+      <div>
+        <div class="panel" style="position:sticky; top:80px;">
+          <div class="panel-header">Máquinas <span id="mc-count">5</span></div>
+          <div class="machine-list" id="machine-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ REGISTRO SALVO</div>
+
+<script src="script.js"></script>
+</body>
+</html>
